@@ -83,7 +83,10 @@ def get_policy(mdp: MDP, U: np.ndarray) -> np.ndarray:
 def policy_evaluation(mdp: MDP, policy: np.ndarray) -> np.ndarray:
 
     correct_U = np.zeros((mdp.num_row, mdp.num_col))
-    c=0
+    
+    for (row, col) in mdp.terminal_states:
+        correct_U[row][col] = 0.1*float(mdp.board[row][col])
+                    
     while True:
         delta = 0
         U_update = np.copy(correct_U)
@@ -94,7 +97,7 @@ def policy_evaluation(mdp: MDP, policy: np.ndarray) -> np.ndarray:
 
                 if reward == "WALL" or (row, col) in mdp.terminal_states:
                     continue
-                
+    
                 #Evaluate utility for the current state according to the given policy
                 step = Action(policy[row][col])  
                 next_state = mdp.step((row, col), step)
@@ -119,12 +122,12 @@ def policy_evaluation(mdp: MDP, policy: np.ndarray) -> np.ndarray:
 def policy_iteration(mdp: MDP, policy_init: np.ndarray) -> np.ndarray:
     policy = deepcopy(policy_init)
     stable = False
-    
+    c=0
     #Run until there is no change in optimal policy
-    while not stable:
+    while not stable or c<20:
         correct_U = policy_evaluation(mdp, policy)
         stable = True
-
+        c += 1 
         for row in range(mdp.num_row):
             for col in range(mdp.num_col):
                 
@@ -149,8 +152,20 @@ def policy_iteration(mdp: MDP, policy_init: np.ndarray) -> np.ndarray:
                         best_action = action
 
                 if best_action and best_action != current_action:
+                    print("Best:")
+                    print(best_action)
+                    print("current")
+                    print(current_action)
+                    print("Row:")
+                    print(row)
+                    print("Col:")
+                    print(col)
+                    print("---------------------------------------")
                     policy[row][col] = str(best_action)  
                     stable = False
+        print("My:")
+        mdp.print_policy(policy)
+                    
 
     return policy
 
