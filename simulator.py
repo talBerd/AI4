@@ -1,6 +1,7 @@
 
 from typing import Optional, Generator, Tuple, Any, Union
-from MDP import Action
+from mdp import Action
+
 class Simulator():
     def __init__(self, output_file: str='simulator_results.txt'):
         self.output_file = output_file
