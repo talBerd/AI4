@@ -60,16 +60,35 @@ def example_driver():
 def adp_example_driver():
 
     sim = Simulator()
+    numbers=[10,100,1000]
+    policy = [['UP', 'UP', 'UP', 0],
+              ['UP', 'WALL', 'UP', 0],
+              ['UP', 'UP', 'UP', 'UP']]
+    mdp = MDP.load_mdp()
+    for num in numbers:
+        reward_matrix, transition_probabilities = adp_algorithm(sim,num_episodes=num)
+    
+        print("Reward Matrix:")
+        print(reward_matrix)
+        
+        print("\n Transition Probabilities:")
+        for action, probs in transition_probabilities.items():
+            print(f"{action}: {probs}")
+        policy = [['UP', 'UP', 'UP', 0],
+              ['UP', 'WALL', 'UP', 0],
+              ['UP', 'UP', 'UP', 'UP']]    
+        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')   
+        print("@@@@@@@@@ Policy iteration @@@@@@@@")
+        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 
-    
-    reward_matrix, transition_probabilities = adp_algorithm(sim,num_episodes=1000)
-  
-    print("Reward Matrix:")
-    print(reward_matrix)
-    
-    print("\n Transition Probabilities:")
-    for action, probs in transition_probabilities.items():
-        print(f"{action}: {probs}")
+
+        policy = [['UP', 'UP', 'UP', 0],
+                ['UP', 'WALL', 'UP', 0],
+                ['UP', 'UP', 'UP', 'UP']]
+
+        print("\nFinal policy:")
+        policy_new = policy_iteration(mdp, policy)
+        mdp.print_policy(policy_new)
 
     
 if __name__ == '__main__':

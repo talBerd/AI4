@@ -107,8 +107,6 @@ def policy_evaluation(mdp: MDP, policy: np.ndarray) -> np.ndarray:
 
                 delta = max(delta, abs(U_update[row][col] - correct_U[row][col]))
 
-                if abs(U_update[row][col] - correct_U[row][col]) > delta:
-                        delta = abs(U_update[row][col] - correct_U[row][col])
         
         correct_U = U_update
         #Stop when the numbers don't change anymore
