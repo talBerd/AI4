@@ -94,4 +94,4 @@ def adp_example_driver():
 if __name__ == '__main__':
     # run our example
     example_driver()
-    #adp_example_driver()
+    adp_example_driver()

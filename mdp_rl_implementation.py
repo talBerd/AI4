@@ -38,10 +38,11 @@ def value_iteration(mdp: MDP, U_init: np.ndarray, epsilon: float=10 ** (-3)) -> 
 
                     U_update[row][col] = float(reward) + mdp.gamma * max(utilities)
 
-                if abs(U_update[row][col] - correct_U[row][col]) > delta:
-                    delta = abs(U_update[row][col] - correct_U[row][col])
+                delta = max(delta, abs(U_update[row][col] - correct_U[row][col]))
 
         correct_U = U_update
+        print("this")
+        print(get_policy(mdp,correct_U))
 
     return correct_U
 
@@ -85,7 +86,7 @@ def policy_evaluation(mdp: MDP, policy: np.ndarray) -> np.ndarray:
     correct_U = np.zeros((mdp.num_row, mdp.num_col))
     
     for (row, col) in mdp.terminal_states:
-        correct_U[row][col] = 0.1*float(mdp.board[row][col])
+        correct_U[row][col] = float(mdp.board[row][col])
                     
     while True:
         delta = 0
@@ -95,18 +96,22 @@ def policy_evaluation(mdp: MDP, policy: np.ndarray) -> np.ndarray:
                 
                 reward = mdp.board[row][col]
 
-                if reward == "WALL" or (row, col) in mdp.terminal_states:
+                if reward == "WALL":
                     continue
-    
-                #Evaluate utility for the current state according to the given policy
-                step = Action(policy[row][col])  
-                next_state = mdp.step((row, col), step)
                 
-                expected_utility = sum(
-                    mdp.transition_function[step][i] * correct_U[next_state[0]][next_state[1]]
-                    for i in range(4)
-                )
-                U_update[row][col] = float(reward) + mdp.gamma * expected_utility
+                if (row, col) in mdp.terminal_states:
+                    U_update[row][col] = float(reward)
+                    
+                else:
+                    #Evaluate utility for the current state according to the given policy
+                    step = Action(policy[row][col])  
+                    next_state = mdp.step((row, col), step)
+                    
+                    expected_utility = sum(
+                        mdp.transition_function[step][i] * correct_U[next_state[0]][next_state[1]]
+                        for i in range(4)
+                    )
+                    U_update[row][col] = float(reward) + mdp.gamma * expected_utility
 
                 delta = max(delta, abs(U_update[row][col] - correct_U[row][col]))
 
@@ -124,7 +129,7 @@ def policy_iteration(mdp: MDP, policy_init: np.ndarray) -> np.ndarray:
     stable = False
     c=0
     #Run until there is no change in optimal policy
-    while not stable or c<20:
+    while not stable:
         correct_U = policy_evaluation(mdp, policy)
         stable = True
         c += 1 
@@ -136,37 +141,28 @@ def policy_iteration(mdp: MDP, policy_init: np.ndarray) -> np.ndarray:
                     continue
 
                 current_action = Action[policy[row][col]] if policy[row][col] else None
-                best_action = None
+                best_alternative_action = None
                 max_value = float('-inf')
+                curr_value= correct_U[row][col]
                 
-                #Find optimal action according to policy evaluation
-                for action in Action:
-                    total = 0
-                    for i, direction in enumerate(Action):
-                        next_state = mdp.step((row, col), direction)
-                        probability = mdp.transition_function[action][i]  
-                        total += probability * correct_U[next_state[0]][next_state[1]]
+                #Evaluate utility considering all possible results from an action
+                for action in mdp.actions:
+                    next_state = mdp.step((row, col), action)
+                    utility = sum(
+                        mdp.transition_function[action][i] * correct_U[next_state[0]][next_state[1]]
+                        for i, direction in enumerate(mdp.actions)
+                    )
+                    if action == current_action:
+                        curr_value = utility
+                    elif utility > max_value:
+                        max_value =  utility
+                        best_alternative_action= action
 
-                    if total > max_value:
-                        max_value = total
-                        best_action = action
-
-                if best_action and best_action != current_action:
-                    print("Best:")
-                    print(best_action)
-                    print("current")
-                    print(current_action)
-                    print("Row:")
-                    print(row)
-                    print("Col:")
-                    print(col)
-                    print("---------------------------------------")
-                    policy[row][col] = str(best_action)  
+                #Check if we have to update to more optimal policy
+                if curr_value < max_value:
+                    policy[row][col] = str(best_alternative_action)  
                     stable = False
-        print("My:")
-        mdp.print_policy(policy)
                     
-
     return policy
 
 def adp_algorithm(
@@ -193,8 +189,7 @@ def adp_algorithm(
     
     # Initialize transition counters with zeros for all (action, actual_action) pairs
     transition_counts = {action: {act: 0 for act in actions} for action in actions}
-    rewards = np.zeros((num_rows, num_cols, len(actions)))  
-    
+    rewards = np.zeros((num_rows, num_cols)) 
     for episode_gen in sim.replay(num_episodes):
         for state, reward, action, actual_action in episode_gen:
             if action is not None:
@@ -202,7 +197,7 @@ def adp_algorithm(
                 action_index = list(Action).index(action)
                 
                 #Fill the reward matrix
-                rewards[row, col, action_index] = reward  
+                rewards[row, col] = reward  
                 
             if action is not None and actual_action is not None:
                 transition_counts[action][actual_action] += 1
