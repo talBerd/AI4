@@ -27,13 +27,18 @@ def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
     #  - Test the model on the test set (evaluate the accuracy) and print the result.
 
     # ====== YOUR CODE: ======
+    
     features, _, _ = load_data_set('ID3')
-        # Create an instance of the ID3 decision tree
+    
+    #Create an instance of the ID3 decision tree
     id3_tree = ID3(features)
+    
+    #Fit the tree
     id3_tree.fit(x_train, y_train) 
+    
+    #Test the model
     y_prediction = id3_tree.predict(x_test)
 
-    # Calculate the accuracy
     acc = accuracy(y=y_test, y_pred=y_prediction)
     # ========================
 

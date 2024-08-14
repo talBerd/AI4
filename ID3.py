@@ -29,11 +29,11 @@ class ID3:
 
         counts = class_counts(rows, labels)
         impurity = 0.0
-        num_samples = labels.size
+        num_labels = labels.size
 
         # ====== YOUR CODE: ======
         for count in counts.values():
-            probability = count / num_samples
+            probability = count / num_labels
             impurity -= probability * math.log2(probability) if probability > 0 else 0
 
         # ========================
@@ -58,16 +58,16 @@ class ID3:
             'The split of current node is not right, rows size should be equal to labels size.'
 
         # ====== YOUR CODE: ======
-        left_s = len(left)
-        right_s = len(right)
-        total_size = left_s + right_s
-        left_side_entropy = 0 if left_s == 0 else self.entropy(left, left_labels)
-        right_side_entropy = 0 if right_s == 0 else self.entropy(right, right_labels)
+        left_side_size = len(left)
+        right_side_size = len(right)
+        total_size = left_side_size  + right_side_size 
 
-        # Calculate information gain
-        info_gain_value = current_uncertainty - (left_s / total_size) * left_side_entropy - (right_s / total_size) * right_side_entropy
+        left_side_entropy = self.entropy(left, left_labels)
+        right_side_entropy = self.entropy(right, right_labels)
+        
+        info_gain = current_uncertainty - (left_side_size  / total_size) * left_side_entropy - (right_side_size / total_size) * right_side_entropy
         # ========================
-        return info_gain_value
+        return info_gain
 
 
     def partition(self, rows, labels, question: Question, current_uncertainty):
@@ -83,18 +83,18 @@ class ID3:
         #   - For each row in the dataset, check if it matches the question.
         #   - If so, add it to 'true rows', otherwise, add it to 'false rows'.
         #   - Calculate the info gain using the `info_gain` method.
-
+        gain, true_rows, true_labels, false_rows, false_labels = None, None, None, None, None
         assert len(rows) == len(labels), 'Rows size should be equal to labels size.'
 
         # ====== YOUR CODE: ======
         matches = np.array([question.match(row) for row in rows])
         non_matches=~matches
+        
         true_rows = rows[matches]
         true_labels = labels[matches]
         false_rows = rows[non_matches]
         false_labels = labels[non_matches]
 
-        # Calculate the information gain
         gain = self.info_gain(true_rows, true_labels, false_rows, false_labels, current_uncertainty)
         # ========================
 
@@ -110,23 +110,28 @@ class ID3:
         # TODO:
         #   - For each feature of the dataset, build a proper question to partition the dataset using this feature.
         #   - find the best feature to split the data. (using the `partition` method)
-        best_gain = - math.inf  # keep track of the best information gain
-        best_question = None  # keep train of the feature / value that produced it
+        
+        
+        
+        best_gain = - math.inf 
+        best_question = None 
         best_false_rows, best_false_labels = None, None
         best_true_rows, best_true_labels = None, None
         current_uncertainty = self.entropy(rows, labels)
 
         # ====== YOUR CODE: ======
-        n_features = rows.shape[1]  # number of features
-        for f in range(n_features):
-                values = np.unique(rows[:, f])  # unique values in the column
-                # To find the optimal split, test each possible average between consecutive unique values
+        num_features = rows.shape[1]  
+        for f in range(num_features):
+                values = np.unique(rows[:, f]) 
+                
+                # Dynamic paritition for non discrete values
                 optimal_split = (values[:-1] + values[1:]) / 2
 
                 for val in optimal_split:
                         present_question = Question(self.label_names[f], f, val)
                         gain, true_rows, true_labels, false_rows, false_labels = self.partition(rows, labels, present_question, current_uncertainty)
                         
+                        #Take the split with the best gain (In case of a draw take the newest)
                         if best_gain <= gain:
                                 best_gain = gain
                                 best_question = present_question
@@ -151,12 +156,15 @@ class ID3:
         #   - Try partitioning the dataset using the feature that produces the highest gain.
         #   - Recursively build the true, false branches.
         #   - Build the Question node which contains the best question with true_branch, false_branch as children
-
+        best_question = None
+        true_branch, false_branch = None, None
         # ====== YOUR CODE: ======
-        if len(set(labels)) == 1 or len(rows) <= 1:  # Pruning condition based on the size of the dataset
+        
+        #Return a leaf for one sample/label
+        if len(set(labels)) == 1 or len(rows) <= 1:  
                 return Leaf(rows, labels)
 
-        # Find the best split with the highest information gain
+        #Find the split with the highest information gain
         best_gain, best_question, true_samples, true_targets, false_samples, false_targets = self.find_best_split(rows, labels)
 
         # If no information gain, return a leaf
@@ -169,7 +177,7 @@ class ID3:
         # ========================
 
         return DecisionNode(best_question, true_branch, false_branch)
-
+    
     def fit(self, x_train, y_train):
         """
         Trains the ID3 model. By building the tree.
@@ -194,8 +202,9 @@ class ID3:
 
         if node is None:
             node = self.tree_root
-
+        prediction = None
         # ====== YOUR CODE: ======
+        #Iterate until wev reached a leaf
         while isinstance(node, DecisionNode):
                 if node.question.match(row):
                         node = node.true_branch
@@ -215,7 +224,7 @@ class ID3:
         """
         # TODO:
         #  Implement ID3 class prediction for set of data.
-
+        y_pred=None 
         # ====== YOUR CODE: ======
         y_pred = np.array([self.predict_sample(row) for row in rows])
         # ========================

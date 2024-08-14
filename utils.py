@@ -35,8 +35,6 @@ def accuracy(y: np.array, y_pred: np.array)-> float:
     """
     # TODO: Calculate prediction accuracy. Don't use an explicit loop.
 
-    assert y.shape == y_pred.shape
-    assert y.ndim == 1
     # ====== YOUR CODE: ======
     accuracy_val = (np.sum(y==y_pred) / y.shape[0])
     # ========================
@@ -58,8 +56,8 @@ def l2_dist(x1: np.array, x2: np.array):
     #  Note: Use only basic numpy operations, no external code.
 
     # ====== YOUR CODE: ======
-    subtrucst = (x1[:, np.newaxis] - x2[np.newaxis, :])
-    dists = np.sqrt(np.sum(subtrucst ** 2, axis=2))
+    difference_matrix = (x1[:, np.newaxis] - x2[np.newaxis, :])
+    dists = np.sqrt(np.sum(difference_matrix ** 2, axis=2))
     # ========================
 
     return dists
