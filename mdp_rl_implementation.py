@@ -157,11 +157,10 @@ def policy_iteration(mdp: MDP, policy_init: np.ndarray) -> np.ndarray:
                     elif utility > max_value:
                         max_value =  utility
                         best_alternative_action= action
-
                 #Check if we have to update to more optimal policy
                 if curr_value < max_value:
                     policy[row][col] = str(best_alternative_action)  
-                    stable = False
+                    stable = False     
                     
     return policy
 
