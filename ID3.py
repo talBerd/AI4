@@ -171,7 +171,7 @@ class ID3:
         if best_gain == 0:
                 return Leaf(rows, labels)
 
-        # Recursively build the branches
+        # Recursively build the rest of the tree
         true_branch = self.build_tree(true_samples, true_targets)
         false_branch = self.build_tree(false_samples, false_targets)
         # ========================

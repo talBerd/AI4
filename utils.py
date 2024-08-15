@@ -36,7 +36,8 @@ def accuracy(y: np.array, y_pred: np.array)-> float:
     # TODO: Calculate prediction accuracy. Don't use an explicit loop.
 
     # ====== YOUR CODE: ======
-    accuracy_val = (np.sum(y==y_pred) / y.shape[0])
+    num_predictions = y.shape[0]
+    accuracy_val = (np.sum(y==y_pred) / num_predictions)
     # ========================
 
     return accuracy_val
