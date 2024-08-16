@@ -5,11 +5,22 @@ import numpy as np
 from copy import deepcopy
 from collections import defaultdict
 
+"""
+Evaluate utility per state considering all possible results from a certain action 
+Input: The mdp object, state coordinates , the action and the current utility
+Output: Utility for the state
+"""
+def evaluate_utility(mdp : MDP ,row: int,col : int,action: Action,correct_U : np.ndarray):
+    utility=0
+    for i, direction in enumerate(mdp.actions):
+        next_step= mdp.step((row, col), direction)
+        utility += mdp.transition_function[action][i] * correct_U[next_step[0]][next_step[1]]
+    return utility
 
 def value_iteration(mdp: MDP, U_init: np.ndarray, epsilon: float=10 ** (-3)) -> np.ndarray:
     correct_U = deepcopy(U_init)
     delta = float('inf')  
-
+    epsilon=0.001
     while delta >= epsilon * (1 - mdp.gamma) / mdp.gamma:
         U_update = deepcopy(correct_U)
         delta = 0
@@ -26,23 +37,17 @@ def value_iteration(mdp: MDP, U_init: np.ndarray, epsilon: float=10 ** (-3)) -> 
                     U_update[row][col] = float(reward)
                     
                 else:
-                    utilities = []
+                    max_utility = float('-inf')
                     for action in mdp.actions:
-                        #Evaluate utility considering all possible results from an action
-                        next_state = mdp.step((row, col), action)
-                        utility = sum(
-                            mdp.transition_function[action][i] * correct_U[next_state[0]][next_state[1]]
-                            for i, direction in enumerate(mdp.actions)
-                        )
-                        utilities.append(utility)
 
-                    U_update[row][col] = float(reward) + mdp.gamma * max(utilities)
-
+                        expected_utility =evaluate_utility(mdp,row,col,action,correct_U)
+                        #Find best utility 
+                        if expected_utility > max_utility:
+                            max_utility = expected_utility
+                    U_update[row][col] = float(reward) + mdp.gamma * max_utility
                 delta = max(delta, abs(U_update[row][col] - correct_U[row][col]))
 
         correct_U = U_update
-        print("this")
-        print(get_policy(mdp,correct_U))
 
     return correct_U
 
@@ -65,14 +70,9 @@ def get_policy(mdp: MDP, U: np.ndarray) -> np.ndarray:
                 max_utility = float('-inf')
                 
                 for action in mdp.actions:
-                    #Evaluate utility considering all possible results from an action
-                    next_state = mdp.step((row, col), action)
-                    expected_utility = sum(
-                        mdp.transition_function[action][i] * U[next_state[0]][next_state[1]]
-                        for i in range(4)
-                    )
-                    #Find best utility and action 
-                    if expected_utility > max_utility:
+                   expected_utility=evaluate_utility(mdp,row,col,action,U)
+                   #Find best utility and action 
+                   if expected_utility > max_utility:
                         max_utility = expected_utility
                         best_action = action
 
@@ -105,12 +105,8 @@ def policy_evaluation(mdp: MDP, policy: np.ndarray) -> np.ndarray:
                 else:
                     #Evaluate utility for the current state according to the given policy
                     step = Action(policy[row][col])  
-                    next_state = mdp.step((row, col), step)
                     
-                    expected_utility = sum(
-                        mdp.transition_function[step][i] * correct_U[next_state[0]][next_state[1]]
-                        for i in range(4)
-                    )
+                    expected_utility = evaluate_utility(mdp,row,col,step,correct_U)
                     U_update[row][col] = float(reward) + mdp.gamma * expected_utility
 
                 delta = max(delta, abs(U_update[row][col] - correct_U[row][col]))
@@ -148,10 +144,7 @@ def policy_iteration(mdp: MDP, policy_init: np.ndarray) -> np.ndarray:
                 #Evaluate utility considering all possible results from an action
                 for action in mdp.actions:
                     next_state = mdp.step((row, col), action)
-                    utility = sum(
-                        mdp.transition_function[action][i] * correct_U[next_state[0]][next_state[1]]
-                        for i, direction in enumerate(mdp.actions)
-                    )
+                    utility =  evaluate_utility(mdp,row,col,action,correct_U)
                     if action == current_action:
                         curr_value = utility
                     elif utility > max_value:

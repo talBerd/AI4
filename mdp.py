@@ -120,8 +120,6 @@ class MDP:
                 action_key = Action(action)
                 transition_function_env[action_key] = tuple(map(float, prob))
 
-
-
         mdp = MDP(board=board_env,
                   terminal_states=terminal_states_env,
                   transition_function=transition_function_env,
