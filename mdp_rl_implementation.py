@@ -39,7 +39,6 @@ def value_iteration(mdp: MDP, U_init: np.ndarray, epsilon: float=10 ** (-3)) -> 
                 else:
                     max_utility = float('-inf')
                     for action in mdp.actions:
-
                         expected_utility =evaluate_utility(mdp,row,col,action,correct_U)
                         #Find best utility 
                         if expected_utility > max_utility:
@@ -105,8 +104,8 @@ def policy_evaluation(mdp: MDP, policy: np.ndarray) -> np.ndarray:
                 else:
                     #Evaluate utility for the current state according to the given policy
                     step = Action(policy[row][col])  
-                    
                     expected_utility = evaluate_utility(mdp,row,col,step,correct_U)
+                    
                     U_update[row][col] = float(reward) + mdp.gamma * expected_utility
 
                 delta = max(delta, abs(U_update[row][col] - correct_U[row][col]))
@@ -123,12 +122,10 @@ def policy_evaluation(mdp: MDP, policy: np.ndarray) -> np.ndarray:
 def policy_iteration(mdp: MDP, policy_init: np.ndarray) -> np.ndarray:
     policy = deepcopy(policy_init)
     stable = False
-    c=0
     #Run until there is no change in optimal policy
     while not stable:
         correct_U = policy_evaluation(mdp, policy)
         stable = True
-        c += 1 
         for row in range(mdp.num_row):
             for col in range(mdp.num_col):
                 
@@ -143,7 +140,6 @@ def policy_iteration(mdp: MDP, policy_init: np.ndarray) -> np.ndarray:
                 
                 #Evaluate utility considering all possible results from an action
                 for action in mdp.actions:
-                    next_state = mdp.step((row, col), action)
                     utility =  evaluate_utility(mdp,row,col,action,correct_U)
                     if action == current_action:
                         curr_value = utility
