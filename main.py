@@ -74,9 +74,7 @@ def adp_example_driver():
         print("\n Transition Probabilities:")
         for action, probs in transition_probabilities.items():
             print(f"{action}: {probs}")
-        policy = [['UP', 'UP', 'UP', 0],
-              ['UP', 'WALL', 'UP', 0],
-              ['UP', 'UP', 'UP', 'UP']]    
+ 
         print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')   
         print("@@@@@@@@@ Policy iteration @@@@@@@@")
         print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
@@ -94,4 +92,4 @@ def adp_example_driver():
 if __name__ == '__main__':
     # run our example
     example_driver()
-    #adp_example_driver()
+    adp_example_driver()
