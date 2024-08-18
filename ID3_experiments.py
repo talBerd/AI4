@@ -28,10 +28,10 @@ def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
 
     # ====== YOUR CODE: ======
     
-    features, _, _ = load_data_set('ID3')
+    label_names, _, _ = load_data_set('ID3')
     
     #Create an instance of the ID3 decision tree
-    id3_tree = ID3(features)
+    id3_tree = ID3(label_names)
     
     #Fit the tree
     id3_tree.fit(x_train, y_train) 

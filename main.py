@@ -1,7 +1,8 @@
 
 from mdp_rl_implementation import value_iteration, get_policy, policy_evaluation, policy_iteration, adp_algorithm
-from mdp import MDP
+from mdp import MDP, Action, format_transition_function, print_transition_function
 from simulator import Simulator
+
 
 def example_driver():
     """
@@ -43,8 +44,8 @@ def example_driver():
     U_eval = policy_evaluation(mdp, policy)
     mdp.print_utility(U_eval)
 
-    policy = [['UP', 'UP', 'UP', 0],
-              ['UP', 'WALL', 'UP', 0],
+    policy = [['UP', 'UP', 'UP', None],
+              ['UP', None, 'UP', None],
               ['UP', 'UP', 'UP', 'UP']]
 
     print("\nInitial policy:")
@@ -55,8 +56,6 @@ def example_driver():
 
     print("Done!")
     
-
-
 def adp_example_driver():
 
     sim = Simulator()
@@ -70,10 +69,11 @@ def adp_example_driver():
     
         print("Reward Matrix:")
         print(reward_matrix)
+
         
-        print("\n Transition Probabilities:")
-        for action, probs in transition_probabilities.items():
-            print(f"{action}: {probs}")
+        formatted_transitions = format_transition_function(transition_probabilities)
+        print("Transition Probabilities:")
+        print_transition_function(formatted_transitions)
  
         print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')   
         print("@@@@@@@@@ Policy iteration @@@@@@@@")

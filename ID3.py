@@ -29,9 +29,9 @@ class ID3:
 
         counts = class_counts(rows, labels)
         impurity = 0.0
-        num_labels = labels.size
 
         # ====== YOUR CODE: ======
+        num_labels = labels.size
         for count in counts.values():
             probability = count / num_labels
             impurity -= probability * math.log2(probability) if probability > 0 else 0
